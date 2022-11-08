@@ -27,6 +27,7 @@ public class Login {
             stmt.setInt(1, userID);
             stmt.setString(2, padRight(userPassword,40));
             results = stmt.executeQuery();
+            hasLoggedin = true;
             }while(results.next()==false);
             if(choice == 1){
                 String type = results.getString("type");

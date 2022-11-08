@@ -240,14 +240,14 @@ public class Manager {
                 insertrole.setInt(1, eid);
             }
             else{
-                insertsql = conn.prepareStatement("INSERT INTO HOURLY_EMPLOYEES VALUES (E_Id)");
-                insertrole = conn.prepareStatement("insert into Mechanics Values(E_id)");
+                insertsql = conn.prepareStatement("INSERT INTO HOURLY_EMPLOYEES VALUES (?)");
+                insertrole = conn.prepareStatement("insert into Mechanics Values(?)");
                 insertsql.setInt(1,eid);
                 insertrole.setInt(1,eid);
             }
             System.out.println("Press any of the following options from the menu to proceed further:");
             System.out.println("1.Add Employee\n2.Go Back");
-            int choice = scan.nextInt();
+            int choice = Integer.parseInt(scan.nextLine());
             if(choice == 1){
                 try {
                     insertEmployee.executeUpdate();
