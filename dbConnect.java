@@ -4,7 +4,7 @@ public class dbConnect {
 
     static final String jdbcURL = "jdbc:oracle:thin:@ora.csc.ncsu.edu:1521:orcl01";
     static String user = "mquresh";	// For example, "jsmith"
-    static String passwd = "200476724mquresh";	// Your 9 digit student ID number
+    static String passwd = "";	// Your 9 digit student ID number
 
     public static Connection conn = null;
     public static Statement stmt = null;
