@@ -15,18 +15,51 @@ public class Customer {
     public static Scanner scan = new Scanner(System.in);
     public static HashSet<Integer> cart = new HashSet<Integer>();
 
-    public static void customerMenu(int c_id,int sc_no){
+    public static void customerMenu(int c_id){
         cust_id = c_id;
-        service_centre_no = sc_no;
+        try{
+        PreparedStatement getSc = conn.prepareStatement("select s_id from customer where id=?");
+        getSc.setInt(1,cust_id);
+        ResultSet getScresult = getSc.executeQuery();getScresult.next();
+        service_centre_no = getScresult.getInt("s_id");
+        }catch(SQLException e){e.printStackTrace();}
         int choice;
         System.out.println("===============Welcome to the Customer Panel==============");
+        do {
+        System.out.println("Press any of the following options from the menu to proceed further:");
+        System.out.println("1. View and Update Profile");
+        System.out.println("2. View and Schedule Services");
+        System.out.println("3. Invoices");
+        System.out.println("4. Logout");
+        choice = Integer.parseInt(scan.nextLine());
+            switch (choice) {
+            case 1:
+                customerProfileMenu();
+                break;
+            case 2:
+                scheduleServiceMenu();
+                break;
+            case 3:
+                invoicesMenu();
+                break;
+            case 4:
+                return;
+            default:
+                System.out.println("Selection is invalid");
+                break;
+            }
+        } while (choice != 4);
+
+    }
+
+    public static void customerProfileMenu(){
+        int choice;
         do {
         System.out.println("Press any of the following options from the menu to proceed further:");
         System.out.println("1. View Profile");
         System.out.println("2. Add Car");
         System.out.println("3. Delete Car");
-        System.out.println("4. View and Schedule Service");
-        System.out.println("5. Go Back");
+        System.out.println("4. Go Back");
         choice = Integer.parseInt(scan.nextLine());
             switch (choice) {
             case 1:
@@ -39,14 +72,12 @@ public class Customer {
                 deleteCar();
                 break;
             case 4:
-                scheduleServiceMenu();
-            case 5:
                 return;
             default:
                 System.out.println("Selection is invalid");
                 break;
             }
-        } while (choice != 5);
+        } while (choice != 4);
 
     }
     public static void viewCustomerProfile(){
@@ -216,10 +247,9 @@ public class Customer {
                 if(run){System.out.println("Not a valid VIN.");}
                 System.out.println("Press enter the VIN of the car whos maintenance or repair you want to schedule:");
                 vin = scan.nextLine();
-                PreparedStatement getCar = conn.prepareStatement("select * from car where vin=?");
-                getCar.setString(1, vin);
+                PreparedStatement getCar = conn.prepareStatement("select manufacturer from car where vin=?");
+                getCar.setString(1, padRight(vin,100));
                 getCarResults = getCar.executeQuery();
-                System.out.println(getCarResults.next());
                 run = true;
             }
                 while(getCarResults.next()==false);
@@ -254,7 +284,7 @@ public class Customer {
         try{
             System.out.println("The service you are currently eligible for is:");
             PreparedStatement ps = conn.prepareStatement("select last_schedule from car where vin=?");
-            ps.setString(1, vin);
+            ps.setString(1, padRight(vin,100));
             ResultSet rs = ps.executeQuery();rs.next();
             String next_schedule="";
             String last_schedule = rs.getString("last_schedule");
@@ -271,7 +301,7 @@ public class Customer {
             if(choice == 1){
                 try {
                     ps = conn.prepareStatement("select service_no from services where name=?");
-                    ps.setString(1, next_schedule);
+                    ps.setString(1, padRight(next_schedule,1));
                     rs = ps.executeQuery();rs.next();
                     int service_no = rs.getInt("service_no");
                     cart.add(service_no);
@@ -366,4 +396,136 @@ public class Customer {
             } while (choice != 2);
         }catch(SQLException e){e.printStackTrace();}
     }
+
+    public static void invoicesMenu(){
+        try{
+        int choice;
+        PreparedStatement ps = conn.prepareStatement("select invoice_id,status from invoice where c_id=?");
+        ps.setInt(1, cust_id);
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()){
+            System.out.println("Invoice Number: "+rs.getInt("invoice_id")+", Invoice Status: "+rs.getString("status"));
+        }
+        do {
+        System.out.println("Press any of the following options from the menu to proceed further:");
+        System.out.println("1. View Invoice Details");
+        System.out.println("2. Pay Invoice");
+        System.out.println("3. Go Back");
+        choice = Integer.parseInt(scan.nextLine());
+            switch (choice) {
+            case 1:
+                viewInvoiceDetails();
+                break;
+            case 2:
+                payInvoice();
+                break;
+            case 3:
+                return;
+            default:
+                System.out.println("Selection is invalid");
+                break;
+            }
+        } while (choice != 3);
+        }catch(SQLException e){e.printStackTrace();}
+    }
+    public static void viewInvoiceDetails(){
+        try{
+            ResultSet getInvoiceResults;
+            int invoice_id;
+            int total_cost=0;
+            boolean run = false;
+            PreparedStatement getInvoice;
+            String manf;
+            do{
+                if(run){System.out.println("Not a valid Invoice ID.");}
+                System.out.println("Press enter the Invoice ID for the invoice you want to retrieve:");
+                invoice_id = Integer.parseInt(scan.nextLine());
+                getInvoice = conn.prepareStatement("select * from invoice where invoice_id=?");
+                getInvoice.setInt(1, invoice_id);
+                getInvoiceResults = getInvoice.executeQuery();
+                PreparedStatement getManf = conn.prepareStatement("select manufacturer from car where vin=?");
+                getManf.setString(1, getInvoiceResults.getString("vin"));
+                ResultSet getManfResults = getManf.executeQuery();getManfResults.next();
+                manf = getManfResults.getString("manufacturer");
+                run = true;
+            }
+                while(getInvoiceResults.next()==false);
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            System.out.println("1.View Invoice\n2.Go Back");
+            int choice = Integer.parseInt(scan.nextLine());
+            if(choice == 1){
+                try {
+                    System.out.println("Invoice ID:"+getInvoiceResults.getString("invoice_id"));
+                    System.out.println("Customer ID:"+getInvoiceResults.getString("cust_id"));
+                    System.out.println("VIN:"+getInvoiceResults.getString("vin"));
+                    System.out.println("Service Date:"+getInvoiceResults.getString("service_date"));
+                    System.out.println("Invoice Status:"+getInvoiceResults.getInt("paid"));
+                    System.out.println("Mechanic ID:"+getInvoiceResults.getInt("m_id"));
+                    PreparedStatement invoiceServices = conn.prepareStatement("select service_no from invoice_has_service where invoice_no=?");
+                    invoiceServices.setInt(1, invoice_id);
+                    ResultSet rs = invoiceServices.executeQuery();
+                    while(rs.next()){
+                        System.out.println("Service ID(s):"+rs.getInt("service_no"));
+                        PreparedStatement serviceCost = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and manufacturer=?");
+                        serviceCost.setInt(1,rs.getInt("service_no"));
+                        serviceCost.setString(2,manf);
+                        ResultSet serviceCostResult = serviceCost.executeQuery();
+                        System.out.println("Cost of Service:"+serviceCostResult.getInt("cost"));
+                        total_cost+=serviceCostResult.getInt("cost");
+                    }
+                    System.out.println("Total cost of Services:"+total_cost);
+                } catch (SQLException e) {
+                    System.out.println("Could not insert. Please try again");
+                    e.printStackTrace();
+                }
+            }
+            else if (choice == 2){
+                return;
+            }
+            else{
+                System.out.println("Invalid Input");
+            } 
+        }catch(SQLException e){e.printStackTrace();}
+    }
+    public static void payInvoice(){
+        try{
+            int invoice_id;
+            boolean run = false;
+            PreparedStatement getInvoice;
+            ResultSet getInvoiceResults;
+            do{
+                if(run){System.out.println("Not a valid Invoice ID.");}
+                System.out.println("Press enter the Invoice ID for the invoice you want to pay:");
+                invoice_id = Integer.parseInt(scan.nextLine());
+                getInvoice = conn.prepareStatement("select * from invoice where invoice_id=?");
+                getInvoice.setInt(1, invoice_id);
+                getInvoiceResults = getInvoice.executeQuery();
+                run = true;
+            }
+                while(getInvoiceResults.next()==false);
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            System.out.println("1.Pay Invoice\n2.Go Back");
+            int choice = Integer.parseInt(scan.nextLine());
+            if(choice == 1){
+                try {
+                    PreparedStatement payInvoice = conn.prepareStatement("update invoice set paid=1 where invoice_id=?");
+                    payInvoice.setInt(1,invoice_id);
+                    payInvoice.executeUpdate();
+                    System.out.println("Invoice had been paid!");
+                } catch (SQLException e) {
+                    System.out.println("Could not insert. Please try again");
+                    e.printStackTrace();
+                }
+            }
+            else if (choice == 2){
+                return;
+            }
+            else{
+                System.out.println("Invalid Input");
+            } 
+        }catch(SQLException e){e.printStackTrace();}
+    }
+    public static String padRight(String s, int n) {
+        return String.format("%-" + n + "s", s);  
+   }
 }

@@ -12,7 +12,7 @@ public class Menu {
             choice = Integer.parseInt(scan.nextLine());
                 switch (choice) {
                 case 1:
-                    Customer.customerMenu(10010,30002);
+                    Login.loginPage();
                     break;
                 case 2:
                     scan.close();
