@@ -446,7 +446,7 @@ public class Customer {
             choice = Integer.parseInt(scan.nextLine());
                 switch (choice) {
                 case 1:
-                    //scheduleTime(cart);
+                    scheduleTime();
                     break;
                 case 2:
                     return;
@@ -457,7 +457,9 @@ public class Customer {
             } while (choice != 2);
         }catch(SQLException e){e.printStackTrace();}
     }
-
+    public static void scheduleTime(){
+        
+    }
     public static void invoicesMenu(){
         try{
         int choice;
