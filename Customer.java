@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Scanner;
 
 
@@ -12,6 +13,7 @@ public class Customer {
     public static int cust_id;
     public static int service_centre_no;
     public static Scanner scan = new Scanner(System.in);
+    public static HashSet<Integer> cart = new HashSet<Integer>();
 
     public static void customerMenu(int c_id,int sc_no){
         cust_id = c_id;
@@ -23,6 +25,7 @@ public class Customer {
         System.out.println("1. View Profile");
         System.out.println("2. Add Car");
         System.out.println("3. Delete Car");
+        System.out.println("3. View and Schedule Service");
         System.out.println("4. Go Back");
         choice = Integer.parseInt(scan.nextLine());
             switch (choice) {
@@ -36,12 +39,14 @@ public class Customer {
                 deleteCar();
                 break;
             case 4:
+                scheduleServiceMenu();
+            case 5:
                 return;
             default:
                 System.out.println("Selection is invalid");
                 break;
             }
-        } while (choice != 4);
+        } while (choice != 5);
 
     }
     public static void viewCustomerProfile(){
@@ -174,6 +179,190 @@ public class Customer {
             else{
                 System.out.println("Invalid Input");
             }            
+        }catch(SQLException e){e.printStackTrace();}
+    }
+
+    public static void scheduleServiceMenu(){
+        
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            int choice;
+            do{
+            System.out.println("1. View Service History");
+            System.out.println("2. Schedule Service");
+            System.out.println("3. Go Back");
+            choice = Integer.parseInt(scan.nextLine());
+                switch (choice) {
+                case 1:
+                    //viewServicesHistory();
+                    break;
+                case 2:
+                    scheduleNewService();
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Selection is invalid");
+                    break;
+                }
+            } while (choice != 3);
+    }
+
+    public static void scheduleNewService(){
+        try{
+            ResultSet getCarResults;
+            String vin;
+            boolean run = false;
+            do{
+                if(run){System.out.println("Not a valid VIN.");}
+                System.out.println("Press enter the VIN of the car whos maintenance or repair you want to schedule:");
+                vin = scan.nextLine();
+                PreparedStatement getCar = conn.prepareStatement("select * from car where vin=?");
+                getCar.setString(1, vin);
+                getCarResults = getCar.executeQuery();
+                run = true;
+            }
+                while(getCarResults.next()==false);
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            int choice;
+            do{
+            System.out.println("1. Add Schedule Maintenance");
+            System.out.println("2. Add Schedule Repair");
+            System.out.println("3. View Cart and Schedule Time Slot");
+            System.out.println("4. Go Back");
+            choice = Integer.parseInt(scan.nextLine());
+                switch (choice) {
+                case 1:
+                    addMaintenanceService(vin);
+                    break;
+                case 2:
+                    addRepairService();
+                    break;
+                case 3:
+                    viewCart();
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println("Selection is invalid");
+                    break;
+                }
+            } while (choice != 4);
+        }catch(SQLException e){e.printStackTrace();}
+    }
+    public static void addMaintenanceService(String vin){
+        try{
+            System.out.println("The service you are currently eligible for is:");
+            PreparedStatement ps = conn.prepareStatement("select last_schedule from car where vin=?");
+            ps.setString(1, vin);
+            ResultSet rs = ps.executeQuery();rs.next();
+            String next_schedule="";
+            String last_schedule = rs.getString("last_schedule");
+            if(last_schedule.equals("C"))
+                next_schedule = "A";
+            else if (last_schedule.equals("A"))
+                next_schedule = "B";
+            else if(last_schedule.equals("B"))
+                next_schedule = "C";
+            System.out.println("Schedule "+ next_schedule);
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            System.out.println("1.Accept and add to cart\n2.Go Back");
+            int choice = Integer.parseInt(scan.nextLine());
+            if(choice == 1){
+                try {
+                    ps = conn.prepareStatement("select service_no from service where name=?");
+                    ps.setString(1, next_schedule);
+                    rs = ps.executeQuery();
+                    int service_no = rs.getInt("service_no");
+                    cart.add(service_no);
+                    System.out.println("Successfully added to cart");
+                } catch (SQLException e) {
+                    System.out.println("Could not insert. Please try again");
+                    e.printStackTrace();
+                }
+            }
+            else if (choice == 2){
+                return;
+            }
+            else{
+                System.out.println("Invalid Input");
+            } 
+        }catch(SQLException e){e.printStackTrace();}
+    }
+
+    public static void addRepairService(){
+            System.out.println("The service you are currently eligible for are:");
+            int choice;
+            HashSet<Integer> services = new HashSet<Integer>();
+            do{
+                System.out.println("1.Engine Services\n2.Exhaust Services\n3.Electrical Services\n4.Transmission Services"+
+                                "\n5.Tire Services\n6.Heating and AC Services\n7.Go Back");
+                choice = Integer.parseInt(scan.nextLine());
+                    switch (choice) {
+                    case 1:
+                        services = RepairServices.getEngineServices();
+                        cart.addAll(services);
+                        break;
+                    case 2:
+                        services = RepairServices.getExhaustServices();
+                        cart.addAll(services);
+                        break;
+                    case 3:
+                        services = RepairServices.getElectricalServices();
+                        cart.addAll(services);
+                        break;
+                    case 4:
+                        services = RepairServices.getTransmissionServices();
+                        cart.addAll(services);
+                        break;
+                    case 5:
+                        services = RepairServices.getTireServices();
+                        cart.addAll(services);
+                        break;
+                    case 6:
+                        services = RepairServices.getHeatingServices();
+                        cart.addAll(services);
+                        break;
+                    case 7:
+                        return;
+                    default:
+                        System.out.println("Selection is invalid");
+                        break;
+                    }
+                    
+            } while (choice != 7); 
+    }
+        public static void viewCart(){
+        try{
+            System.out.println("The services added to your cart are:");
+            PreparedStatement ps;
+            ResultSet rs;
+            for(int service_no: cart){
+                ps = conn.prepareStatement("select name from service_no=?");
+                ps.setInt(1,service_no);
+                rs = ps.executeQuery();
+                if(!rs.next())
+                    System.out.println("Cart is empty");
+                else{
+                    System.out.println("Service Number: "+service_no +", Service Name: "+rs.getString("name"));
+                }
+            }
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            int choice;
+            do{
+            System.out.println("1. Proceed with Scheduling");
+            System.out.println("2. Go Back");
+            choice = Integer.parseInt(scan.nextLine());
+                switch (choice) {
+                case 1:
+                    //scheduleTime(cart);
+                    break;
+                case 2:
+                    return;
+                default:
+                    System.out.println("Selection is invalid");
+                    break;
+                }
+            } while (choice != 2);
         }catch(SQLException e){e.printStackTrace();}
     }
 }
