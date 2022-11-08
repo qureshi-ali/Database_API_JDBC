@@ -11,9 +11,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from engine)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();    
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));
@@ -37,9 +38,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from exhaust)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));
@@ -63,9 +65,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from electrical)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));
@@ -89,9 +92,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from transmission)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));
@@ -115,9 +119,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from tire)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));
@@ -141,9 +146,10 @@ public class RepairServices {
         try{
             HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
             PreparedStatement ps = conn.prepareStatement("select name,service_no from services where service_no in (select service_no from heat_and_ac)");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
             int choice,i;
             do{
+            rs = ps.executeQuery();
             i = 1;
             while(rs.next()){
                 map.put(i, rs.getInt("service_no"));

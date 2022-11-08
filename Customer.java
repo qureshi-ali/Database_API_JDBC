@@ -25,8 +25,8 @@ public class Customer {
         System.out.println("1. View Profile");
         System.out.println("2. Add Car");
         System.out.println("3. Delete Car");
-        System.out.println("3. View and Schedule Service");
-        System.out.println("4. Go Back");
+        System.out.println("4. View and Schedule Service");
+        System.out.println("5. Go Back");
         choice = Integer.parseInt(scan.nextLine());
             switch (choice) {
             case 1:
@@ -219,6 +219,7 @@ public class Customer {
                 PreparedStatement getCar = conn.prepareStatement("select * from car where vin=?");
                 getCar.setString(1, vin);
                 getCarResults = getCar.executeQuery();
+                System.out.println(getCarResults.next());
                 run = true;
             }
                 while(getCarResults.next()==false);
@@ -269,9 +270,9 @@ public class Customer {
             int choice = Integer.parseInt(scan.nextLine());
             if(choice == 1){
                 try {
-                    ps = conn.prepareStatement("select service_no from service where name=?");
+                    ps = conn.prepareStatement("select service_no from services where name=?");
                     ps.setString(1, next_schedule);
-                    rs = ps.executeQuery();
+                    rs = ps.executeQuery();rs.next();
                     int service_no = rs.getInt("service_no");
                     cart.add(service_no);
                     System.out.println("Successfully added to cart");
@@ -337,7 +338,7 @@ public class Customer {
             PreparedStatement ps;
             ResultSet rs;
             for(int service_no: cart){
-                ps = conn.prepareStatement("select name from service_no=?");
+                ps = conn.prepareStatement("select name from services where service_no=?");
                 ps.setInt(1,service_no);
                 rs = ps.executeQuery();
                 if(!rs.next())
