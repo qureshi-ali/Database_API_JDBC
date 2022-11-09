@@ -10,6 +10,7 @@ public class Customer {
     public static Connection conn = dbConnect.conn;
     public static int cust_id;
     public static int service_centre_no;
+    public static String vin;
     public static Scanner scan = new Scanner(System.in);
     public static HashSet<Integer> cart = new HashSet<Integer>();
 
@@ -300,7 +301,6 @@ public class Customer {
     public static void scheduleNewService(){
         try{
             ResultSet getCarResults;
-            String vin;
             boolean run = false;
             do{
                 if(run){System.out.println("Not a valid VIN.");}
@@ -456,7 +456,57 @@ public class Customer {
         }catch(SQLException e){e.printStackTrace();}
     }
     public static void scheduleTime(){
-            Timeslot.getTimesSlots(cust_id,service_centre_no,6);
+        try{
+            int duration=0;
+            int invId = (int)(Math.random() * 10000);
+            for(int service_no:cart){
+                PreparedStatement ps = conn.prepareStatement("select manufacturer from car where vin=?");
+                ps.setString(1, padRight(vin,100));
+                ResultSet rs =ps.executeQuery();
+                String manf = rs.getString("manufacturer");
+                ps = conn.prepareStatement("select duration from car_needs_service where manufacturer = ? and service_no =?");
+                ps.setString(1, manf);
+                ps.setInt(2, service_no);
+                rs = ps.executeQuery();
+                
+                duration+=rs.getInt("duration");
+            }
+            System.out.println("The total duration of the services is: "+duration);
+            System.out.println("The time slots available are:");
+            Timeslot.getTimesSlots(cust_id,service_centre_no,duration);
+            System.out.println("Enter the following details to proceed to scheduling services");
+            System.out.println("1.Mechanic ID\n2.Week\n3.Day\n4.Start Time");
+            int mech_id = Integer.parseInt(scan.nextLine());
+            int week = Integer.parseInt(scan.nextLine());
+            int day = Integer.parseInt(scan.nextLine());
+            int start_time = Integer.parseInt(scan.nextLine());
+            int start_time_copy = start_time;
+            while(duration>0){
+                PreparedStatement insertBookings= conn.prepareStatement("insert into bookings values(?,?)");
+                insertBookings.setInt(1, mech_id);
+                insertBookings.setInt(2, start_time);
+                insertBookings.executeQuery();
+                start_time++;
+                duration--;
+            }
+            PreparedStatement insertInvoice = conn.prepareStatement("insert into Invoice(invoice_id,m_id,cust_id,s_id,vin,start_time_slot,paid)"+
+                                            "values(?,?,?,?,?,?,?)");
+            insertInvoice.setInt(1, invId);
+            insertInvoice.setInt(2, mech_id);
+            insertInvoice.setInt(3, cust_id);
+            insertInvoice.setInt(4, service_centre_no);
+            insertInvoice.setString(5, padRight(vin,100));
+            insertInvoice.setInt(6, start_time_copy);
+            insertInvoice.setInt(7,0);
+            insertInvoice.executeQuery();
+            System.out.println("Successfully generated Invoice");
+            for(int service_no:cart){
+            PreparedStatement invoiceServices = conn.prepareStatement("insert into invoice_has_service values(?,?)");
+            invoiceServices.setInt(1, invId);
+            invoiceServices.setInt(2, service_no);
+            invoiceServices.executeQuery();
+            }
+        }catch(SQLException e){e.printStackTrace();}
     }
     public static void invoicesMenu(){
         try{

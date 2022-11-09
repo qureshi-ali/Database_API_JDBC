@@ -13,6 +13,10 @@ public class Timeslot {
             PreparedStatement ps_get_mechanics = conn.prepareStatement("select m.e_Id from mechanics m, employee e where m.e_id=e.e_id and e.id = ?");
             ps_get_mechanics.setInt(1,service_center_no);
             ResultSet rs=ps_get_mechanics.executeQuery();
+            PreparedStatement ps= conn.prepareStatement("select sat_open from service_centre where id=?");
+            ps.setInt(1,service_center_no);
+            ResultSet psResultSet = ps.executeQuery();psResultSet.next();
+            String sat_open = psResultSet.getString("sat_open");
             while(rs.next()){
                 int mech=rs.getInt("e_id");
                 all_mechanics.add(mech);
@@ -21,6 +25,8 @@ public class Timeslot {
                 for (int i=1; i<=5; i++){
                     for (int j=1;j<=6;j++){
                         if(i==5 && j>3)
+                            break;
+                        if(sat_open.equals("Y") && j>5)
                             break;
                         PreparedStatement ps_get_available = conn.prepareStatement("((select t.id, m.e_Id from mechanics m cross join time_slot t, employee e where e.e_id=m.e_id and t.daysofweek=? and t.week=? and m.e_id=? and  e.id=(select e1.Id from employee e1 where e1.e_id=?)) minus (select t_id, m_id from bookings)) minus (select t_id,m_id from mech_time_off)");
                         ps_get_available.setInt(1, j);
