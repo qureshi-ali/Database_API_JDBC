@@ -9,6 +9,7 @@ public class Menu {
             System.out.println("Press any of the following options from the menu to proceed further:");
             System.out.println("1. Login");
             System.out.println("2. Exit");
+            System.out.println("3. Queries");
             choice = Integer.parseInt(scan.nextLine());
                 switch (choice) {
                 case 1:
@@ -18,6 +19,9 @@ public class Menu {
                     scan.close();
                     System.out.println("Exiting...");
                     System.exit(0);
+                    break;
+                case 3:
+                    Queries.runQueries();
                     break;
                 default:
                     System.out.println("Selection is invalid");

@@ -60,7 +60,7 @@ public class Receptionist {
             String insertCustomer = "insert into customer(Id,S_Id,Fname,Lname,standing,status,address,email,phone)"+
                                     "VALUES(?,?,?,?,?,?,?,?,?)";
             String insertCar = "insert into car(Vin,mileage,manufacturer,last_schedule,year)"+
-                                "VALUES (?,?,?,'A',?)";
+                                "VALUES (?,?,?,'C',?)";
             String insertCustHasCar = "insert into cust_has_car(vin,Id,S_id)"+
                                         "VALUES (?,?,?)";
             PreparedStatement ps_cust = conn.prepareStatement(insertCustomer);

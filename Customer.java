@@ -135,7 +135,7 @@ public class Customer {
             ResultSet rs = ps.executeQuery();rs.next();
             int service_centre_no = rs.getInt("s_id");
             String insertCar = "insert into car(Vin,mileage,manufacturer,last_schedule,year)"+
-                                "VALUES (?,?,?,'A',?)";
+                                "VALUES (?,?,?,'C',?)";
             String insertCustHasCar = "insert into cust_has_car(vin,Id,S_id)"+
                                         "VALUES (?,?,?)";
             PreparedStatement ps_car = conn.prepareStatement(insertCar);
@@ -482,6 +482,16 @@ public class Customer {
                 insertBookings.executeQuery();
                 start_time++;
                 duration--;
+            }
+            if(cart.contains(113) ||cart.contains(114)||cart.contains(115)){
+                String x = "A";
+                if(cart.contains(113))
+                    x ="B";
+                else if (cart.contains(114))
+                    x="C";
+                PreparedStatement inps = conn.prepareStatement("update car set last_schedule = ?");
+                inps.setString(1, padRight(x,1));
+                inps.executeUpdate();
             }
             PreparedStatement insertInvoice = conn.prepareStatement("insert into Invoice(invoice_id,m_id,cust_id,s_id,vin,start_time_slot,paid)"+
                                             "values(?,?,?,?,?,?,?)");
