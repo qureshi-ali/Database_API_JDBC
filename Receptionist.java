@@ -26,7 +26,7 @@ public class Receptionist {
                 addNewCustomer();
                 break;
             case 2:
-                // getPendingInvoices();
+                getPendingInvoices();
                 break;
             case 3:
                 return;
@@ -108,4 +108,55 @@ public class Receptionist {
             System.out.println("Failure! Could not add new customer\n");
             e.printStackTrace();}
     }
+
+
+    public static void getPendingInvoices(){
+        try{
+            System.out.println("The customers with pending invoices are:");
+            PreparedStatement ps = conn.prepareStatement("select invoice_id,cust_id,vin from Invoices");
+            ResultSet rs = ps.executeQuery();rs.next();
+            int inv_id = rs.getInt("invoice_id");
+            int cust_id = rs.getInt("cust_id");
+            String vin = rs.getString("vin");
+            ps = conn.prepareStatement("select fname,lname from customer where id= ?");
+            ps.setInt(1, cust_id);
+            rs = ps.executeQuery();rs.next();
+            String name = rs.getString("fname") + " " + rs.getString("lname");
+            ps = conn.prepareStatement("select service_no from invoice_has_service where invoice_id=?");
+            ps.setInt(1, inv_id);
+            rs = ps.executeQuery();rs.next();
+            ps = conn.prepareStatement("select manufacturer from car where vin=?");
+            ps.setString(1, padRight(vin, 100));
+            rs = ps.executeQuery();rs.next();
+            String manf = rs.getString("manufacturer");
+            int total_cost=0;
+            while(rs.next()){
+                System.out.println("Service ID(s):"+rs.getInt("service_no"));
+                PreparedStatement serviceCost = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and manufacturer=?");
+                serviceCost.setInt(1,rs.getInt("service_no"));
+                serviceCost.setString(2,padRight(manf,100));
+                ResultSet serviceCostResult = serviceCost.executeQuery();serviceCostResult.next();
+                System.out.println("Cost of Service:"+serviceCostResult.getInt("cost"));
+                total_cost+=serviceCostResult.getInt("cost");
+            }
+            System.out.println("Customer ID:"+cust_id);
+            System.out.println("Customer Name:"+name);
+            System.out.println("Invoice ID:"+inv_id);
+            System.out.println("Cost of Invoice:"+total_cost);
+            System.out.println("Press any of the following options from the menu to proceed further:");
+            System.out.println("1.Go Back");
+            int choice = scan.nextInt();
+            if(choice == 1){
+                return;
+            }
+            else{
+                System.out.println("Invalid Input");
+            }
+            System.out.println("Success! Adding New Customer...");
+
+        }catch(SQLException e){e.printStackTrace();}
+    }
+    public static String padRight(String s, int n) {
+        return String.format("%-" + n + "s", s);  
+   }
 }

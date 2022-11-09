@@ -462,13 +462,12 @@ public class Customer {
             for(int service_no:cart){
                 PreparedStatement ps = conn.prepareStatement("select manufacturer from car where vin=?");
                 ps.setString(1, padRight(vin,100));
-                ResultSet rs =ps.executeQuery();
+                ResultSet rs =ps.executeQuery();rs.next();
                 String manf = rs.getString("manufacturer");
                 ps = conn.prepareStatement("select duration from car_needs_service where manufacturer = ? and service_no =?");
                 ps.setString(1, manf);
                 ps.setInt(2, service_no);
-                rs = ps.executeQuery();
-                
+                rs = ps.executeQuery();rs.next();
                 duration+=rs.getInt("duration");
             }
             System.out.println("The total duration of the services is: "+duration);
@@ -515,7 +514,7 @@ public class Customer {
         ps.setInt(1, cust_id);
         ResultSet rs = ps.executeQuery();
         while(rs.next()){
-            System.out.println("Invoice Number: "+rs.getInt("invoice_id")+", Invoice Status: "+rs.getString("status"));
+            System.out.println("Invoice Number: "+rs.getInt("invoice_id")+", Invoice Status: "+(rs.getInt("paid")==1?"Paid":"Unpaid"));
         }
         do {
         System.out.println("Press any of the following options from the menu to proceed further:");
@@ -569,18 +568,17 @@ public class Customer {
                     System.out.println("Invoice ID:"+getInvoiceResults.getString("invoice_id"));
                     System.out.println("Customer ID:"+getInvoiceResults.getString("cust_id"));
                     System.out.println("VIN:"+getInvoiceResults.getString("vin"));
-                    System.out.println("Service Date:"+getInvoiceResults.getString("service_date"));
                     System.out.println("Invoice Status:"+getInvoiceResults.getInt("paid"));
                     System.out.println("Mechanic ID:"+getInvoiceResults.getInt("m_id"));
-                    PreparedStatement invoiceServices = conn.prepareStatement("select service_no from invoice_has_service where invoice_no=?");
+                    PreparedStatement invoiceServices = conn.prepareStatement("select service_no from invoice_has_service where invoice_id=?");
                     invoiceServices.setInt(1, invoice_id);
                     ResultSet rs = invoiceServices.executeQuery();
                     while(rs.next()){
                         System.out.println("Service ID(s):"+rs.getInt("service_no"));
                         PreparedStatement serviceCost = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and manufacturer=?");
                         serviceCost.setInt(1,rs.getInt("service_no"));
-                        serviceCost.setString(2,manf);
-                        ResultSet serviceCostResult = serviceCost.executeQuery();
+                        serviceCost.setString(2,padRight(manf,100));
+                        ResultSet serviceCostResult = serviceCost.executeQuery();serviceCostResult.next();
                         System.out.println("Cost of Service:"+serviceCostResult.getInt("cost"));
                         total_cost+=serviceCostResult.getInt("cost");
                     }
