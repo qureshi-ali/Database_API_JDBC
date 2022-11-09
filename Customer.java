@@ -261,32 +261,27 @@ public class Customer {
                 int choice = Integer.parseInt(scan.nextLine());
                 if(choice == 1){
                     try {
-                        ps = conn.prepareStatement("select invoice_id,s_id from invoice where vin=?");
+                        ps = conn.prepareStatement("select invoice_id,s_id,vin from invoice where vin=?");
                         ps.setString(1, padRight(vin,100));
                         rs = ps.executeQuery();
-                        if(rs.next()==false){
-                            System.out.println("You do not have service history.");
-                            return;
-                        }
+                        while(rs.next()){
                         service_centre_no = rs.getInt("s_id");
                         invoice_no = rs.getInt("invoice_id");
                         PreparedStatement getServices = conn.prepareStatement("select service_no from invoice_has_service where invoice_id=?");
                         getServices.setInt(1, invoice_no);
                         ResultSet getServicesResults = getServices.executeQuery();
-                        PreparedStatement getServiceDetails = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and id=? and manufacturer=?");
+                        System.out.println("Invoice Number: "+invoice_no);
+                        System.out.println("Service Center Number: "+service_centre_no);
+                        System.out.println("VIN Number: "+vin);
                         while(getServicesResults.next()){
+                            PreparedStatement getServiceDetails = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and manufacturer=?");
                             getServiceDetails.setInt(1, getServicesResults.getInt("service_no"));
-                            getServiceDetails.setInt(2, service_centre_no);
-                            getServiceDetails.setString(3, manf);
-                            ResultSet getServiceDetailsResults = getServiceDetails.executeQuery();
-                            System.out.println("Invoice Number: "+invoice_no);
-                            System.out.println("Service Center Number: "+service_centre_no);
-                            System.out.println("VIN Number: "+vin);
-                            System.out.println("Service ID: "+getServicesResults.getString("service_no"));
+                            getServiceDetails.setString(2, padRight(manf,100));
+                            ResultSet getServiceDetailsResults = getServiceDetails.executeQuery();getServiceDetailsResults.next();
+                            System.out.println("Service ID: "+getServicesResults.getInt("service_no"));
                             System.out.println("Cost: "+getServiceDetailsResults.getInt("cost"));
-                        }
+                        }}
                     } catch (SQLException e) {
-                        System.out.println("Could not insert. Please try again");
                         e.printStackTrace();
                     }
                 }
