@@ -40,6 +40,8 @@ public class Login {
                         Receptionist.receptionMenu(userID);
                     else if (type.equals(padRight("manager", 20)))
                         Manager.managerMenu(userID);
+                    else if (type.equals(padRight("mechanic", 20)))
+                        Mechanic.mechanicMenu(userID);
             }    
             else if (choice == 2){
                 return;
