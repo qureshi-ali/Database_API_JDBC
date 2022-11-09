@@ -42,8 +42,7 @@ public class Receptionist {
         try{
             System.out.println("Please enter the following details to add the store.");
             System.out.println("1.First Name\n2.Last Name\n3.Address\n4.Email\n"+
-                                "5.Phone Number\n6.VIN Number\n7.Car Manufacturer\n8.Current Mileage\n9.Year\n"+
-                                "10.Customer ID");
+                                "5.Phone Number\n6.VIN Number\n7.Car Manufacturer\n8.Current Mileage\n9.Year");
             String fname = scan.nextLine();
             String lname = scan.nextLine();
             String address = scan.nextLine();
@@ -53,7 +52,7 @@ public class Receptionist {
             String manf = scan.nextLine();
             int mileage = Integer.parseInt(scan.nextLine());
             int year = Integer.parseInt(scan.nextLine());
-            int cust_id = Integer.parseInt(scan.nextLine());
+            int cust_id = (int)(Math.random()*100);
             PreparedStatement ps = conn.prepareStatement("select id from employee where e_id=?");
             ps.setInt(1, r_id);
             ResultSet rs = ps.executeQuery();rs.next();
@@ -85,7 +84,7 @@ public class Receptionist {
             ps_custhascar.setInt(3,service_centre_no);
             System.out.println("Press any of the following options from the menu to proceed further:");
             System.out.println("1.Add Customer\n2.Go Back");
-            int choice = scan.nextInt();
+            int choice = Integer.parseInt(scan.nextLine());
             if(choice == 1){
                 try {
                     ps_cust.executeUpdate();
@@ -113,7 +112,7 @@ public class Receptionist {
     public static void getPendingInvoices(){
         try{
             System.out.println("The customers with pending invoices are:");
-            PreparedStatement ps = conn.prepareStatement("select invoice_id,cust_id,vin from Invoices");
+            PreparedStatement ps = conn.prepareStatement("select invoice_id,cust_id,vin from Invoice");
             ResultSet rs = ps.executeQuery();rs.next();
             int inv_id = rs.getInt("invoice_id");
             int cust_id = rs.getInt("cust_id");
@@ -121,15 +120,15 @@ public class Receptionist {
             ps = conn.prepareStatement("select fname,lname from customer where id= ?");
             ps.setInt(1, cust_id);
             rs = ps.executeQuery();rs.next();
-            String name = rs.getString("fname") + " " + rs.getString("lname");
-            ps = conn.prepareStatement("select service_no from invoice_has_service where invoice_id=?");
-            ps.setInt(1, inv_id);
-            rs = ps.executeQuery();rs.next();
+            String name = rs.getString("fname").trim() + " " + rs.getString("lname").trim();
             ps = conn.prepareStatement("select manufacturer from car where vin=?");
             ps.setString(1, padRight(vin, 100));
             rs = ps.executeQuery();rs.next();
             String manf = rs.getString("manufacturer");
             int total_cost=0;
+            ps = conn.prepareStatement("select service_no from invoice_has_service where invoice_id=?");
+            ps.setInt(1, inv_id);
+            rs = ps.executeQuery();
             while(rs.next()){
                 System.out.println("Service ID(s):"+rs.getInt("service_no"));
                 PreparedStatement serviceCost = conn.prepareStatement("select cost from car_has_cost_of_service where service_no=? and manufacturer=?");
@@ -145,7 +144,7 @@ public class Receptionist {
             System.out.println("Cost of Invoice:"+total_cost);
             System.out.println("Press any of the following options from the menu to proceed further:");
             System.out.println("1.Go Back");
-            int choice = scan.nextInt();
+            int choice = Integer.parseInt(scan.nextLine());
             if(choice == 1){
                 return;
             }

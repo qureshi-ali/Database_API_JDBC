@@ -78,7 +78,6 @@ public class Mechanic {
         int end_slot;
         try{
             System.out.println("Please enter the following details to proceed");
-            do{
             System.out.println("1.Start Day\n2.Start Week\n3.Start Slot\n4.End Day\n5.End Week\n6.End Slot");
             start_day = Integer.parseInt(scan.nextLine());
             start_week = Integer.parseInt(scan.nextLine());
@@ -86,6 +85,7 @@ public class Mechanic {
             end_day = Integer.parseInt(scan.nextLine());
             end_week = Integer.parseInt(scan.nextLine());
             end_slot = Integer.parseInt(scan.nextLine());
+            do{
             System.out.println("1.Send Request");
             System.out.println("2.Go Back");
             choice = Integer.parseInt(scan.nextLine());
