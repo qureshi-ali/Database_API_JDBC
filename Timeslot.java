@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Timeslot {
 
@@ -15,8 +16,6 @@ public class Timeslot {
             while(rs.next()){
                 int mech=rs.getInt("e_id");
                 all_mechanics.add(mech);
-                System.out.println(service_center_no);
-                System.out.println(mech);
             }
             for (int mechanic_id:all_mechanics){
                 for (int i=1; i<=5; i++){
@@ -40,6 +39,7 @@ public class Timeslot {
                                         ArrayList<Integer> slots = new ArrayList<Integer>();
                                         slots.add(mechanic_id);
                                         slots.add(start);
+                                        slots.add(previous);
                                         slots.add(i);
                                         slots.add(j);
                                         result_available.add(slots);
@@ -55,6 +55,7 @@ public class Timeslot {
                                 ArrayList<Integer> slots = new ArrayList<Integer>();
                                 slots.add(mechanic_id);
                                 slots.add(start);
+                                slots.add(previous);
                                 slots.add(i);
                                 slots.add(j);
                                 result_available.add(slots);
@@ -64,13 +65,22 @@ public class Timeslot {
                         }
                     }
                 }
-                
+            HashMap<Integer,String> map =new HashMap<Integer,String>();
+            map.put(1, "Mechanic ID:    ");
+            map.put(4, "Week:    ");
+            map.put(5, "Day:    ");
+            map.put(2, "Start Time:    ");
+            map.put(3, "End Time:    ");
             for (ArrayList<Integer> i:result_available){
+                int x = 1;
                 for(int j:i){
-                    System.out.print(j+", ");
+                    System.out.print(map.get(x++)+padLeft(""+j,3)+"\t\t");
                 }
                 System.out.println();
             }
         }catch(SQLException e){e.printStackTrace();}
     }
+    public static String padLeft(String s, int n) {
+        return String.format("%" + n + "s", s);  
+   }
 }
