@@ -170,7 +170,7 @@ public class Mechanic {
         int week1 = rs.getInt("week");
         PreparedStatement ps_count1 = conn.prepareStatement("select count(*) as count1 from time_slot t, bookings b where t.id=b.t_id and t.week=? and b.m_id=?");
         ps_count1.setInt(1, week1);
-        ps_count1.setInt(1, m_id);
+        ps_count1.setInt(2, m_id);
         rs=ps_count1.executeQuery();rs.next();
         int count1 = rs.getInt("count1");
         if (count1+end_time_slot2-start_time_slot2>50){
@@ -183,8 +183,8 @@ public class Mechanic {
         rs=ps_week2.executeQuery();rs.next();
         int week2 = rs.getInt("week");
         PreparedStatement ps_count2 = conn.prepareStatement("select count(*) as count1 from time_slot t, bookings b where t.id=b.t_id and t.week=? and b.m_id=?");
-        ps_count1.setInt(1, week2);
-        ps_count1.setInt(1, m_id2);
+        ps_count2.setInt(1, week2);
+        ps_count2.setInt(2, m_id2);
         rs=ps_count2.executeQuery();rs.next();
         int count2 = rs.getInt("count1");
         if (count2+end_time_slot1-start_time_slot1>50){
@@ -232,17 +232,18 @@ public class Mechanic {
         insert_time_swap.setInt(6, start_time_slot2);
         insert_time_swap.setInt(7,end_time_slot2);
         insert_time_swap.executeUpdate();
+        System.out.println("Successfully added request");
     }catch(SQLException e){e.printStackTrace();}
     }
     public static void getSwapRequests(){
         try{
-            PreparedStatement get_swap_requests = conn.prepareStatement("select * from swap_request where m2_id=?");
+            PreparedStatement get_swap_requests = conn.prepareStatement("select * from swap_request where m_id2=?");
             get_swap_requests.setInt(1, m_id);
             ResultSet rs = get_swap_requests.executeQuery();
             while(rs.next()){
             System.out.println("Swaps have been requested by:");
             System.out.println("Swap RequestID: " + rs.getString("request_id"));
-            System.out.println("Mechanic ID: " + rs.getString("m_id"));
+            System.out.println("Mechanic ID: " + rs.getString("m_id1"));
             System.out.println("Offered Start Time: "+ rs.getString("start_time_slot1"));
             System.out.println("Offered End Time: "+ rs.getString("end_time_slot1"));
             System.out.println("Requested Start Time: "+rs.getString("start_time_slot2"));
@@ -259,25 +260,29 @@ public class Mechanic {
                     int request_id = Integer.parseInt(scan.nextLine());
                     PreparedStatement curr_swap_request = conn.prepareStatement("select * from swap_request where request_id=?");
                     curr_swap_request.setInt(1, request_id);
-                    rs = curr_swap_request.executeQuery();
+                    rs = curr_swap_request.executeQuery();rs.next();
                     int choice2;
                     System.out.println("Press any of the following options from the menu to proceed further:");
                     do{
                     System.out.println("1.Approve Request\n2.Deny Request\n3.Go Back");
                     choice2 = Integer.parseInt(scan.nextLine());
                     if(choice2 == 1){
-                        PreparedStatement ps = conn.prepareStatement("update bookings set m_id=? where m_id=? and time_slot>=? and time_slot<=?");
+                        PreparedStatement ps = conn.prepareStatement("update bookings set m_id=? where m_id=? and t_id>=? and t_id<=?");
                         ps.setInt(1, m_id);
-                        ps.setInt(2, rs.getInt("m_id2"));
+                        ps.setInt(2, rs.getInt("m_id1"));
                         ps.setInt(3, rs.getInt("start_time_slot1"));
-                        ps.setInt(2, rs.getInt("end_time_slot1"));
+                        ps.setInt(4, rs.getInt("end_time_slot1"));
                         ps.executeUpdate();
-                        ps.setInt(1, rs.getInt("m_id2"));
-                        ps.setInt(2, m_id);
-                        ps.setInt(3, rs.getInt("start_time_slot2"));
-                        ps.setInt(4, rs.getInt("end_time_slot2"));
-                        ps.executeUpdate();
+                        PreparedStatement ps2 = conn.prepareStatement("update bookings set m_id=? where m_id=? and t_id>=? and t_id<=?");
+                        ps2.setInt(1, rs.getInt("m_id1"));
+                        ps2.setInt(2, m_id);
+                        ps2.setInt(3, rs.getInt("start_time_slot2"));
+                        ps2.setInt(4, rs.getInt("end_time_slot2"));
+                        ps2.executeUpdate();
                         System.out.println("Swap completed successfully!");
+                        PreparedStatement ps_del = conn.prepareStatement("delete from swap_request where request_id=?");
+                        ps_del.setInt(1,request_id);
+                        ps_del.executeUpdate();
                     }
                     else if (choice2 == 2){
                         PreparedStatement ps = conn.prepareStatement("delete from swap_request where request_id=?");

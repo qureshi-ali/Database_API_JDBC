@@ -493,7 +493,8 @@ public class Customer {
             insertInvoice.setInt(6, start_time_copy);
             insertInvoice.setInt(7,0);
             insertInvoice.executeQuery();
-            System.out.println("Successfully generated Invoice");
+            System.out.println("Successfully booked slots");
+            System.out.println("Successfully generated invoice");
             for(int service_no:cart){
             PreparedStatement invoiceServices = conn.prepareStatement("insert into invoice_has_service values(?,?)");
             invoiceServices.setInt(1, invId);
