@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Scanner;
 
-
-
 public class Customer {
 
     public static Connection conn = dbConnect.conn;
@@ -458,7 +456,7 @@ public class Customer {
         }catch(SQLException e){e.printStackTrace();}
     }
     public static void scheduleTime(){
-        
+            Timeslot.getTimesSlots(cust_id,service_centre_no,6);
     }
     public static void invoicesMenu(){
         try{
