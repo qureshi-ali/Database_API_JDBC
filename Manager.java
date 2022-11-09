@@ -181,10 +181,11 @@ public class Manager {
             ps.setInt(1, mgr_id);
             ResultSet rs = ps.executeQuery();rs.next();
             int service_centre_no = rs.getInt("id");
-            PreparedStatement ps_serviceNo = conn.prepareStatement("select service_no from offers where id=? and "+
-                                            "service_no in (select service_no from repairs)");
-            ps_serviceNo.setInt(1, service_centre_no);
-            ResultSet serviceResults=ps_serviceNo.executeQuery();
+            PreparedStatement getRepairs = conn.prepareStatement("select service_no from repairs");
+            //PreparedStatement ps_serviceNo = conn.prepareStatement("select service_no from offers where id=? and "+
+                                            // "service_no in (select service_no from repairs)");
+            //ps_serviceNo.setInt(1, service_centre_no);
+            ResultSet serviceResults=getRepairs.executeQuery();
             while(serviceResults.next()){
             ResultSet manfResults = Manufacturer.getManfNames();
             while(manfResults.next()){
@@ -205,9 +206,9 @@ public class Manager {
     public static void addNewEmployee(){
         try{
             System.out.println("Please enter the following details to add the employee.");
-            System.out.println("1.Name\n2.Address\n3.Email\n4.Phone Number\n5.Role(Receptionist or Mechanic)"+
+            System.out.println("0.Employee_ID\n1.Name\n2.Address\n3.Email\n4.Phone Number\n5.Role(Receptionist or Mechanic)"+
                                "\n6.Start Date\n7.Salary");
-            int eid = (int)Math.random()*10000;
+            int eid = Integer.parseInt(scan.nextLine());
             String name = scan.nextLine();
             String address = scan.nextLine();
             String email = scan.nextLine();
@@ -230,6 +231,10 @@ public class Manager {
             insertEmployee.setString(4, address);
             insertEmployee.setString(5, email);
             insertEmployee.setInt(6, service_centre_no);
+            PreparedStatement insertValid = conn.prepareStatement("INSERT INTO Valid VALUES (?,'abc',?)");
+            insertValid.setInt(1, eid);
+            insertValid.setString(1, role);
+            insertValid.executeUpdate();
             PreparedStatement insertsql;
             PreparedStatement insertrole;
             if(role.equals("receptionist")){

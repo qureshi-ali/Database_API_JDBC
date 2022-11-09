@@ -8,18 +8,20 @@ import java.util.Scanner;
 public class Customer {
 
     public static Connection conn = dbConnect.conn;
+    public static int username;
     public static int cust_id;
     public static int service_centre_no;
     public static String vin;
     public static Scanner scan = new Scanner(System.in);
     public static HashSet<Integer> cart = new HashSet<Integer>();
 
-    public static void customerMenu(int c_id){
-        cust_id = c_id;
+    public static void customerMenu(int user_name){
+        username = user_name;
         try{
-        PreparedStatement getSc = conn.prepareStatement("select s_id from customer where id=?");
-        getSc.setInt(1,cust_id);
+        PreparedStatement getSc = conn.prepareStatement("select id,s_id from customer where username=?");
+        getSc.setInt(1,username);
         ResultSet getScresult = getSc.executeQuery();getScresult.next();
+        cust_id = getScresult.getInt("id");
         service_centre_no = getScresult.getInt("s_id");
         }catch(SQLException e){e.printStackTrace();}
         int choice;
@@ -82,18 +84,18 @@ public class Customer {
     public static void viewCustomerProfile(){
         try{
             System.out.println("-----------Customer Details-------------------");
-            PreparedStatement ps = conn.prepareStatement("select * from Customer where id = ?");
+            PreparedStatement ps = conn.prepareStatement("select id,s_id,fname,lname,status,standing,email,pno,address from Customer where id = ?");
             ps.setInt(1, cust_id);
             ResultSet rs = ps.executeQuery();rs.next();
-            System.out.println("Customer ID: "+rs.getInt(1));
-            System.out.println("Service Center ID: "+rs.getInt(2));
-            System.out.println("First Name: "+rs.getString(3));
-            System.out.println("Last Name: "+rs.getString(4));
-            System.out.println("Address: "+rs.getInt(7));
-            System.out.println("Phone: "+rs.getInt(9));
-            System.out.println("Email: "+rs.getInt(8));
-            System.out.println("Status: "+rs.getInt(5));
-            System.out.println("Standing: "+rs.getInt(6));
+            System.out.println("Customer ID: "+rs.getInt("id"));
+            System.out.println("Service Center ID: "+rs.getInt("s_id"));
+            System.out.println("First Name: "+rs.getString("fname"));
+            System.out.println("Last Name: "+rs.getString("lname"));
+            System.out.println("Address: "+rs.getString("address"));
+            System.out.println("Phone: "+rs.getInt("pno"));
+            System.out.println("Email: "+rs.getString("email"));
+            System.out.println("Status: "+rs.getInt("status"));
+            System.out.println("Standing: "+rs.getInt("standing"));
             System.out.println("-----------Customer Car Details----------------");
             PreparedStatement ps_car = conn.prepareStatement("select car.vin,car.mileage,car.manufacturer,"+
                                     "car.last_schedule,car.year from customer, car, cust_has_car chc "
@@ -355,7 +357,7 @@ public class Customer {
             if(choice == 1){
                 try {
                     ps = conn.prepareStatement("select service_no from services where name=?");
-                    ps.setString(1, padRight(next_schedule,20));
+                    ps.setString(1, padRight(next_schedule,100));
                     rs = ps.executeQuery();rs.next();
                     int service_no = rs.getInt("service_no");
                     cart.add(service_no);

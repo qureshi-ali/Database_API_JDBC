@@ -196,7 +196,7 @@ public class Mechanic {
         get_booked_slots1.setInt(1, m_id);
         rs=get_booked_slots1.executeQuery();
         int booked;
-        HashSet<Integer> set=new HashSet<Integer>();  
+        HashSet<Integer> set=new HashSet<Integer>();
         while(rs.next()){
             booked=rs.getInt("t_id");
             set.add(booked);
@@ -217,7 +217,7 @@ public class Mechanic {
             set2.add(booked);
         }
         for(int i=start_time_slot1;i<=end_time_slot1;i++){
-            if(set.contains(i)){
+            if(set2.contains(i)){
                 System.out.println("Not possible");
                 return;
             }

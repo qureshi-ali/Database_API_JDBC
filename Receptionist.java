@@ -57,12 +57,16 @@ public class Receptionist {
             ps.setInt(1, r_id);
             ResultSet rs = ps.executeQuery();rs.next();
             int service_centre_no = rs.getInt("id");
-            String insertCustomer = "insert into customer(Id,S_Id,Fname,Lname,standing,status,address,email,phone)"+
-                                    "VALUES(?,?,?,?,?,?,?,?,?)";
+            int username = Integer.parseInt(cust_id+""+service_centre_no);
+            String insertCustomer = "insert into customer(Id,S_Id,Fname,Lname,standing,status,address,email,pno,username)"+
+                                    "VALUES(?,?,?,?,?,?,?,?,?,?)";
             String insertCar = "insert into car(Vin,mileage,manufacturer,last_schedule,year)"+
                                 "VALUES (?,?,?,'C',?)";
             String insertCustHasCar = "insert into cust_has_car(vin,Id,S_id)"+
                                         "VALUES (?,?,?)";
+            PreparedStatement ps_valid = conn.prepareStatement("insert into valid values(?,'abc','customer");
+            ps_valid.setInt(1, username);
+            ps_valid.executeUpdate();
             PreparedStatement ps_cust = conn.prepareStatement(insertCustomer);
             PreparedStatement ps_car = conn.prepareStatement(insertCar);
             PreparedStatement ps_custhascar = conn.prepareStatement(insertCustHasCar);
@@ -75,6 +79,7 @@ public class Receptionist {
             ps_cust.setString(7, address);            
             ps_cust.setString(8, email);            
             ps_cust.setString(9, phone_number);            
+            ps_cust.setInt(10, username);            
             ps_car.setString(1, vin);
             ps_car.setInt(2, mileage);
             ps_car.setString(3, manf);

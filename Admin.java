@@ -77,6 +77,8 @@ public class Admin {
             ps_mgr.setString(5,mgr_email);
             ps_mgr.setInt(6,store_id);
 
+            PreparedStatement ps_valid = conn.prepareStatement("insert into valid values(?,'abc,'manager')");
+            ps_valid.setInt(1, mgr_eid);
             PreparedStatement ps_contract_emp = conn.prepareStatement("insert into CONTRACT_EMPLOYEES( E_Id ,Salary) values (? ,?)");
             ps_contract_emp.setInt(1, mgr_eid);
             ps_contract_emp.setInt(2,mgr_sal);
@@ -90,6 +92,7 @@ public class Admin {
             if(choice == 1){
                 try {
                     ps.executeUpdate();
+                    ps_valid.executeUpdate();
                     ps_mgr.executeUpdate();
                     ps_contract_emp.executeUpdate();
                     ps_mgrtable.executeUpdate();
